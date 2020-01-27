@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greet-client
+  namespace: greet-client
+  labels:
+    app: greet-client
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: greet-client
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      labels:
+        app: greet-client
+        load-balancer: "true"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: greet-client
+        image: registry.local:5000/greet-client:latest
+        env:
+          - name: GRPC_GO_LOG_SEVERITY_LEVEL
+            value: info
+          - name: REV
+            value: "1"
+        ports:
+        - containerPort: 5000
+          name: grpc
+          protocol: TCP

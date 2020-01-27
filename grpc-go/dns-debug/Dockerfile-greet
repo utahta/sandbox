@@ -1,0 +1,31 @@
+FROM golang:1.13-alpine3.10 AS builder
+
+ARG VERSION
+
+RUN set -eux \
+	&& apk --no-cache add \
+		g++ \
+		gcc \
+		git \
+		make \
+		musl-dev
+
+COPY . /sandbox/grpc-go/dns-debug
+WORKDIR /sandbox/grpc-go/dns-debug
+
+RUN make greet-client
+
+FROM alpine:3.10
+
+COPY --from=builder /sandbox/grpc-go/dns-debug/greet-client /usr/local/bin/greet-client
+
+RUN apk --no-cache add \
+	ca-certificates
+
+EXPOSE 5000
+
+RUN addgroup -g 1000 -S app && \
+    adduser -u 1000 -S app -G app
+USER app
+
+ENTRYPOINT ["greet-client"]

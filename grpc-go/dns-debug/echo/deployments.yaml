@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-server
+  namespace: echo-server
+  labels:
+    app: echo-server
+spec:
+  replicas: 5
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: echo-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      labels:
+        app: echo-server
+        load-balancer: "true"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: echo-server
+        image: registry.local:5000/echo-server:latest
+        ports:
+        - containerPort: 5000
+          name: grpc
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-server-hs
+  namespace: echo-server
+spec:
+  type: ClusterIP
+  ports:
+  - name: grpc
+    port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    load-balancer: "true"
+  sessionAffinity: None
+  clusterIP: None
+
