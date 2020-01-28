@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo2-service
+  namespace: echo2-service
+  labels:
+    app: echo2-service
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: echo2-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: echo2-service
+        load-balancer: "echo2-service"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: echo2-service
+        image: registry.local:5000/echo2d:latest
+#        command:
+#          - sh
+#          - -c
+#          - while true; do STATUS=$(wget --spider -S --quiet 'http://localhost:15020/healthz/ready' 2>&1 | grep 'HTTP/' | awk '{print $2}'); if [ ${STATUS:-0} -eq 200 ]; then exec echo2d; break; else sleep 1; fi; done;
+        env:
+          - name: REVISION
+            value: "1"
+        ports:
+        - containerPort: 5000
+          name: grpc
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 18000
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 18000
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-v1-dev
+  namespace: echo2-service
+spec:
+  ports:
+    - name: grpc
+      port: 5000
+      protocol: TCP
+  selector:
+    load-balancer: "echo2-service"
+  type: ClusterIP

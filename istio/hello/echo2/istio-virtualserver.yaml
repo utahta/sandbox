@@ -1,0 +1,16 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: echo2-service
+spec:
+  hosts:
+    - grpc-v1-dev
+  http:
+    - route:
+        - destination:
+            host: grpc-v1-dev.echo2-service.svc.cluster.local
+      fault:
+        abort:
+          percent: 50
+          httpStatus: 400

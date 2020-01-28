@@ -1,0 +1,40 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: echo-service
+  namespace: echo-service
+spec:
+  hosts:
+    - grpc-v1-dev
+  http:
+    - route:
+        - destination:
+            host: grpc-v1-dev.echo-service.svc.cluster.local
+      retries:
+        attempts: 2
+        perTryTimeout: 2s
+        retryOn: unavailable
+#      fault:
+#        abort:
+#          percent: 99
+#          httpStatus: 503
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: echo-service-dr
+  namespace: echo-service
+spec:
+  host: grpc-v1-dev
+  trafficPolicy:
+#    connectionPool:
+#      tcp: {}
+#      http: {}
+    loadBalancer:
+      simple: ROUND_ROBIN
+#    outlierDetection:
+#      consecutiveErrors: 3
+#      interval: 10s
+#      baseEjectionTime: 30s
+#      maxEjectionPercent: 30

@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: grpc-hs-echo-service
+  namespace: greet-service
+spec:
+  hosts:
+    - grpc-hs.echo-service.svc.cluster.local
+  location: MESH_INTERNAL
+  ports:
+    - name: grpc-hs
+      number: 5000
+      protocol: GRPC
+  resolution: DNS

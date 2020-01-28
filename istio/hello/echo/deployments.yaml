@@ -1,0 +1,97 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-service
+  namespace: echo-service
+  labels:
+    app: echo-service
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: echo-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: echo-service
+        load-balancer: "echo-service"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: echo-service
+        image: registry.local:5000/echod:latest
+        command:
+          - sh
+          - -c
+          - while true; do STATUS=$(wget --spider -S --quiet 'http://localhost:15020/healthz/ready' 2>&1 | grep 'HTTP/' | awk '{print $2}'); if [ ${STATUS:-0} -eq 200 ]; then exec echod; break; else sleep 1; fi; done;
+        env:
+          - name: GRPC_GO_LOG_SEVERITY_LEVEL
+            value: info
+          - name: REVISION
+            value: "10"
+          - name: FAILURE_RATE
+            value: "50"
+          - name: RESPONSE_ERROR_CODE
+            value: "unavailable"
+        ports:
+        - containerPort: 5000
+          name: grpc
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 18000
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 18000
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-v1-dev
+  namespace: echo-service
+spec:
+  ports:
+    - name: grpc
+      port: 5000
+      protocol: TCP
+  selector:
+    load-balancer: "echo-service"
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grpc-hs
+  namespace: echo-service
+spec:
+  ports:
+    - name: grpc-hs
+      port: 5000
+      protocol: TCP
+  selector:
+    load-balancer: "echo-service"
+  type: ClusterIP
+  clusterIP: None
