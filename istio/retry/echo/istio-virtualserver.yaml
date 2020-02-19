@@ -1,0 +1,32 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: echo-service
+  namespace: echo-service
+spec:
+  hosts:
+    - grpc-v1-dev
+  http:
+    - name: "/helloworld.Greeter/SayHello"
+      match:
+        - headers:
+            :path:
+              exact: "/helloworld.Greeter/SayHello"
+      route:
+        - destination:
+            host: grpc-v1-dev.echo-service.svc.cluster.local
+      retries:
+        attempts: 1
+        perTryTimeout: 2s
+        retryOn: unavailable
+    - name: "/helloworld.Greeter/SayMorning"
+      match:
+        - headers:
+            :path:
+              exact: "/helloworld.Greeter/SayMorning"
+      route:
+        - destination:
+            host: grpc-v1-dev.echo-service.svc.cluster.local
+      retries:
+        attempts: 0
