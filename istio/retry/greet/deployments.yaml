@@ -40,7 +40,7 @@ spec:
           - name: GRPC_GO_LOG_SEVERITY_LEVEL
             value: info
           - name: REVISION
-            value: "8"
+            value: "9"
         readinessProbe:
           failureThreshold: 3
           httpGet:

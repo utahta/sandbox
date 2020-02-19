@@ -10,14 +10,14 @@ RUN set -eux \
 		make \
 		musl-dev
 
-COPY . /sandbox/istio/hello
-WORKDIR /sandbox/istio/hello
+COPY . /sandbox/istio
+WORKDIR /sandbox/istio
 
 RUN make echod
 
 FROM alpine:3.10
 
-COPY --from=builder /sandbox/istio/hello/echod /usr/local/bin/echod
+COPY --from=builder /sandbox/istio/echod /usr/local/bin/echod
 
 RUN apk --no-cache add \
 	ca-certificates \
