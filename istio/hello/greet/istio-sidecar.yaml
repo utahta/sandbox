@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Sidecar
+metadata:
+  name: greet-service-egress
+  namespace: greet-service
+spec:
+  workloadSelector:
+    labels:
+      app: greet-service
+  egress:
+#  - port:
+#      number: 5000
+#      protocol: GRPC
+#    hosts:
+#    - "hello-echo/hello-echo"
+#    captureMode: NONE
+#    bind: 127.0.0.1
+  - hosts:
+    - "echo-service/*"
+    - "echo2-service/*"
+    - "istio-system/*"
+    - "istio-control/*"
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY

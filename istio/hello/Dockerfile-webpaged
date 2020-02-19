@@ -1,0 +1,31 @@
+FROM golang:1.13-alpine3.10 AS builder
+
+ARG VERSION
+
+RUN set -eux \
+	&& apk --no-cache add \
+		g++ \
+		gcc \
+		git \
+		make \
+		musl-dev
+
+COPY . /sandbox/istio/hello
+WORKDIR /sandbox/istio/hello
+
+RUN make webpaged
+
+FROM alpine:3.10
+
+COPY --from=builder /sandbox/istio/hello/webpaged /usr/local/bin/webpaged
+
+RUN apk --no-cache add \
+	ca-certificates
+
+EXPOSE 8080
+
+RUN addgroup -g 1000 -S app && \
+    adduser -u 1000 -S app -G app
+USER app
+
+ENTRYPOINT ["webpaged"]

@@ -1,0 +1,75 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-webpage
+  namespace: hello-webpage
+  labels:
+    app: hello-webpage
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-webpage
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: hello-webpage
+        load-balancer: "hello-webpage"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: hello-webpage
+        image: registry.local:5000/webpaged:latest
+        command:
+          - sh
+          - -c
+          - while true; do STATUS=$(wget --spider -S --quiet 'http://localhost:15020/healthz/ready' 2>&1 | grep 'HTTP/' | awk '{print $2}'); if [ ${STATUS:-0} -eq 200 ]; then exec webpaged; break; else sleep 1; fi; done;
+        env:
+          - name: REVISION
+            value: "1"
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 8080
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 8080
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http-v1-dev
+  namespace: hello-webpage
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+  selector:
+    load-balancer: "hello-webpage"
+  type: ClusterIP

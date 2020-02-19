@@ -1,0 +1,7 @@
+*.iml
+.idea
+vendor/
+echod
+echo2d
+greetd
+webpaged
