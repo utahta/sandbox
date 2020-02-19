@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/utahta/sandbox/istio/hello/helloworld"
+	"github.com/utahta/sandbox/istio/retry/helloworld"
 	"google.golang.org/grpc"
 )
 

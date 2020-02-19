@@ -39,7 +39,7 @@ spec:
           - name: GRPC_GO_LOG_SEVERITY_LEVEL
             value: info
           - name: REVISION
-            value: "12"
+            value: "13"
           - name: FAILURE_RATE
             value: "50"
           - name: RESPONSE_ERROR_CODE

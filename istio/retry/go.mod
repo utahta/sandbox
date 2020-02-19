@@ -1,4 +1,4 @@
-module github.com/utahta/sandbox/istio/hello
+module github.com/utahta/sandbox/istio/retry
 
 go 1.13
 

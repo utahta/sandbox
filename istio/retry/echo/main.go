@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/utahta/sandbox/istio/hello/helloworld"
+	"github.com/utahta/sandbox/istio/retry/helloworld"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -57,7 +57,7 @@ func failureErr() error {
 					code = i
 				}
 			}
-			return  status.Error(code, fmt.Sprintf("error from %s", os.Getenv("HOSTNAME")))
+			return status.Error(code, fmt.Sprintf("error from %s", os.Getenv("HOSTNAME")))
 		}
 	}
 	return nil

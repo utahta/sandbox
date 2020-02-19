@@ -10,14 +10,14 @@ RUN set -eux \
 		make \
 		musl-dev
 
-COPY . /sandbox/istio/hello
-WORKDIR /sandbox/istio/hello
+COPY . /sandbox/istio
+WORKDIR /sandbox/istio
 
 RUN make greetd
 
 FROM alpine:3.10
 
-COPY --from=builder /sandbox/istio/hello/greetd /usr/local/bin/greetd
+COPY --from=builder /sandbox/istio/greetd /usr/local/bin/greetd
 
 RUN apk --no-cache add \
 	ca-certificates
