@@ -1,0 +1,31 @@
+FROM golang:1.13-alpine3.10 AS builder
+
+ARG VERSION
+
+RUN set -eux \
+	&& apk --no-cache add \
+		g++ \
+		gcc \
+		git \
+		make \
+		musl-dev
+
+COPY . /sandbox/istio
+WORKDIR /sandbox/istio
+
+RUN make greetd
+
+FROM alpine:3.10
+
+COPY --from=builder /sandbox/istio/greetd /usr/local/bin/greetd
+
+RUN apk --no-cache add \
+	ca-certificates
+
+EXPOSE 5000
+
+RUN addgroup -g 1000 -S app && \
+    adduser -u 1000 -S app -G app
+USER app
+
+ENTRYPOINT ["greetd"]

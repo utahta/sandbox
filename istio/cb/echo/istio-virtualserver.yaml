@@ -1,0 +1,54 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: echo-service
+  namespace: echo-service
+spec:
+  hosts:
+    - grpc-v1-dev
+  http:
+    - name: "/helloworld.Greeter/SayHello"
+      match:
+        - headers:
+            :path:
+              exact: "/helloworld.Greeter/SayHello"
+      route:
+        - destination:
+            host: grpc-v1-dev.echo-service.svc.cluster.local
+            subset: "helloworld-greeter-sayhello"
+      retries:
+        attempts: 0
+    - name: "/helloworld.Greeter/SayMorning"
+      match:
+        - headers:
+            :path:
+              exact: "/helloworld.Greeter/SayMorning"
+      route:
+        - destination:
+            host: grpc-v1-dev.echo-service.svc.cluster.local
+            subset: "helloworld-greeter-saymorning"
+      retries:
+        attempts: 0
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: echo-service-dr
+  namespace: echo-service
+spec:
+  host: grpc-v1-dev.echo-service.svc.cluster.local
+  subsets:
+    - name: "helloworld-greeter-sayhello"
+      trafficPolicy:
+        connectionPool:
+          http:
+            http2MaxRequests: 2
+        loadBalancer:
+          simple: ROUND_ROBIN
+        outlierDetection:
+          consecutiveErrors: 3
+          interval: 10s
+          baseEjectionTime: 30s
+          maxEjectionPercent: 30
+    - name: "helloworld-greeter-saymorning"
