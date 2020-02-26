@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greet-service
+  namespace: greet-service
+  labels:
+    app: greet-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greet-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0%
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: greet-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - name: greet-service
+        image: registry.local:5000/greetd:latest
+        command:
+          - sh
+          - -c
+          - while true; do STATUS=$(wget --spider -S --quiet 'http://localhost:15020/healthz/ready' 2>&1 | grep 'HTTP/' | awk '{print $2}'); if [ ${STATUS:-0} -eq 200 ]; then exec greetd; break; else sleep 1; fi; done;
+          #- while true; do STATUS=$(wget --spider -S --quiet 'http://localhost:15020/healthz/ready' 2>&1 | grep 'HTTP/' | awk '{print $2}'); if [ ${STATUS:-0} -eq 200 ]; then exec sleep 3650d; break; else sleep 1; fi; done;
+        env:
+          - name: ECHO_ADDR
+            #value: grpc-hs.echo-service.svc.cluster.local:5000
+            value: grpc-v1-dev.echo-service.svc.cluster.local:5000
+          - name: GRPC_GO_LOG_SEVERITY_LEVEL
+            value: info
+          - name: NUM_CLIENTS
+            value: "1"
+          - name: REVISION
+            value: "11"
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 18000
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: "/health"
+            port: 18000
+            scheme: "HTTP"
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
