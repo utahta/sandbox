@@ -18,8 +18,8 @@ spec:
             host: grpc-v1-dev.echo-service.svc.cluster.local
             subset: "helloworld-greeter-sayhello"
       retries:
-        attempts: 3
-        retryOn: "internal"
+        attempts: 0
+        #retryOn: "unavailable"
     - name: "/helloworld.Greeter/SayMorning"
       match:
         - headers:
@@ -45,12 +45,12 @@ spec:
         connectionPool:
           http:
             http2MaxRequests: 100
-            maxRetries: 1
+            #maxRetries: 1
         loadBalancer:
           simple: ROUND_ROBIN
         outlierDetection:
-          consecutiveErrors: 100
-          interval: 10s
-          baseEjectionTime: 30s
-          maxEjectionPercent: 30
+          consecutiveErrors: 1
+          interval: 5s
+          baseEjectionTime: 300s
+          maxEjectionPercent: 100
     - name: "helloworld-greeter-saymorning"

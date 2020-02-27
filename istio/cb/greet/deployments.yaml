@@ -40,9 +40,9 @@ spec:
           - name: GRPC_GO_LOG_SEVERITY_LEVEL
             value: info
           - name: NUM_CLIENTS
-            value: "10"
+            value: "1"
           - name: REVISION
-            value: "11"
+            value: "12"
         readinessProbe:
           failureThreshold: 3
           httpGet:
