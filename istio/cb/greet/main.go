@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -43,11 +44,12 @@ func main() {
 	numClients, _ := strconv.Atoi(os.Getenv("NUM_CLIENTS"))
 	var wg sync.WaitGroup
 	for i := 0; i < numClients; i++ {
+		id := i
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 
-			ticker := time.NewTicker(1 * time.Second)
+			ticker := time.NewTicker(10 * time.Second)
 			defer ticker.Stop()
 
 			for {
@@ -61,7 +63,7 @@ func main() {
 						wg.Add(1)
 						go func() {
 							defer wg.Done()
-							r, err := c.SayHello(ctx, &helloworld.HelloRequest{Name: "world"})
+							r, err := c.SayHello(ctx, &helloworld.HelloRequest{Name: fmt.Sprintf("world: %d", id)})
 							if err != nil {
 								log.Printf("[%s][ERROR] could not SayHello: %v\n", version, err)
 								return
