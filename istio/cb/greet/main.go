@@ -49,7 +49,7 @@ func main() {
 		go func() {
 			defer wg.Done()
 
-			ticker := time.NewTicker(10 * time.Second)
+			ticker := time.NewTicker(1 * time.Second)
 			defer ticker.Stop()
 
 			for {
@@ -71,16 +71,16 @@ func main() {
 							log.Printf("[%s] SayHello: %s\n", version, r.Message)
 						}()
 
-						wg.Add(1)
-						go func() {
-							defer wg.Done()
-							r, err := c.SayMorning(ctx, &helloworld.MorningRequest{Name: "world"})
-							if err != nil {
-								log.Printf("[%s][ERROR] could not SayMorning: %v\n", version, err)
-								return
-							}
-							log.Printf("[%s] SayMorning: %s\n", version, r.Message)
-						}()
+						//wg.Add(1)
+						//go func() {
+						//	defer wg.Done()
+						//	r, err := c.SayMorning(ctx, &helloworld.MorningRequest{Name: "world"})
+						//	if err != nil {
+						//		log.Printf("[%s][ERROR] could not SayMorning: %v\n", version, err)
+						//		return
+						//	}
+						//	log.Printf("[%s] SayMorning: %s\n", version, r.Message)
+						//}()
 
 						wg.Wait()
 					}()

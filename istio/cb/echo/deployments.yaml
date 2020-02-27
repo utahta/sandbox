@@ -7,7 +7,7 @@ metadata:
   labels:
     app: echo-service
 spec:
-  replicas: 1
+  replicas: 10
   revisionHistoryLimit: 5
   selector:
     matchLabels:
@@ -39,11 +39,11 @@ spec:
           - name: GRPC_GO_LOG_SEVERITY_LEVEL
             value: info
           - name: REVISION
-            value: "16"
+            value: "17"
           - name: FAILURE_RATE
             value: "100"
           - name: RESPONSE_ERROR_CODE
-            value: "internal"
+            value: "unavailable"
         ports:
         - containerPort: 5000
           name: grpc
