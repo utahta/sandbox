@@ -19,7 +19,9 @@ ns.create:
 istio.install:
 	istioctl manifest apply \
 		-s profile=default \
-		-s telemetry.enabled=false \
+		-s values.pilot.autoscaleMin=5 \
+		-s values.pilot.autoscaleMax=10 \
+		-s values.mixer.telemetry.enabled=false \
 		-s values.prometheus.enabled=false \
 		-s values.sidecarInjectorWebhook.enableNamespacesByDefault=true \
 		-s values.global.proxy.autoInject=disabled
@@ -27,7 +29,9 @@ istio.install:
 istio.uninstall:
 	istioctl manifest apply \
 		-s profile=default \
-		-s telemetry.enabled=false \
+		-s values.pilot.autoscaleMin=5 \
+		-s values.pilot.autoscaleMax=10 \
+		-s values.mixer.telemetry.enabled=false \
 		-s values.prometheus.enabled=false \
 		-s values.sidecarInjectorWebhook.enableNamespacesByDefault=true
 		-s values.proxy.autoInject=disabled \
