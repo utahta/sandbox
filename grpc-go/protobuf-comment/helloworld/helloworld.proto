@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package helloworld;
+
+service Greeter {
+  // SayHello before
+  // SayHello before2
+  rpc SayHello (HelloRequest) returns (HelloReply) {} // SayHello middle
+  // hoge
+
+  // SayHello2 before
+  rpc SayHello2 (HelloRequest) returns (HelloReply) {}
+}
+
+message HelloRequest {
+  // name before
+  string name = 1; // name middle
+  // name after
+
+  string name2 = 2;
+}
+
+message HelloReply {
+  string message = 1;
+}
+
+
